@@ -1,2 +1,4 @@
 node_modules
 notes=backend
+.env
+.prod.env

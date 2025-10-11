@@ -13,14 +13,14 @@ class NotesHandler {
     this.deletedNotedHandler = this.deletedNotedHandler.bind(this);
   }
 
-  postNoteHandler(request, h) {
+  async postNoteHandler(request, h) {
     try {
       // eslint-disable-next-line no-underscore-dangle
       this._validator.validationNotes(request.payload);
       const { title = 'untitled', body, tags } = request.payload;
 
       // eslint-disable-next-line no-underscore-dangle
-      const NoteId = this._service.addNote({ title, body, tags });
+      const NoteId = await this._service.addNote({ title, body, tags });
 
       const response = h.response({
         status: 'success',
@@ -53,9 +53,9 @@ class NotesHandler {
     }
   }
 
-  getNoteHandler() {
+  async getNoteHandler() {
     // eslint-disable-next-line no-underscore-dangle
-    const notes = this._service.getNote();
+    const notes = await this._service.getNote();
     return {
       status: 'success',
       data: {
@@ -64,11 +64,11 @@ class NotesHandler {
     };
   }
 
-  getNoteByIdHandler(request, h) {
+  async getNoteByIdHandler(request, h) {
     try {
       const { id } = request.params;
       // eslint-disable-next-line no-underscore-dangle
-      const note = this._service.getNoteById(id);
+      const note = await this._service.getNoteById(id);
 
       return {
         status: 'success',
@@ -87,13 +87,13 @@ class NotesHandler {
     }
   }
 
-  putNotedHandler(request, h) {
+  async putNotedHandler(request, h) {
     try {
       const { id } = request.params;
       // eslint-disable-next-line no-underscore-dangle
       this._validator.validationNotes(request.payload);
       // eslint-disable-next-line no-underscore-dangle
-      this._service.getEditedNote(id, request.payload);
+      await this._service.editedNotes(id, request.payload);
 
       return {
         status: 'success',
@@ -118,12 +118,12 @@ class NotesHandler {
     }
   }
 
-  deletedNotedHandler(request, h) {
+  async deletedNotedHandler(request, h) {
     try {
       const { id } = request.params;
 
       // eslint-disable-next-line no-underscore-dangle
-      this._service.deletedNote(id);
+      await this._service.deletedById(id);
 
       return {
         status: 'success',

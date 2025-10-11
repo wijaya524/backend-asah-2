@@ -51,7 +51,6 @@ class NotesService {
     }
 
     getEditedNote(id, { title, tags, body }) {
-    
         // eslint-disable-next-line no-underscore-dangle
         const index = this._notes.findIndex((note) => note.id === id);
 
