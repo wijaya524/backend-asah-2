@@ -24,12 +24,14 @@ const init = async () => {
     port: process.env.PORT,
     host: process.env.HOST,
     routes: {
-      cors: {
-        origin: ['*'],
-      },
+      cors: { origin: ['*'] },
     },
   });
 
+  // ✅ Registrasi plugin JWT DULU
+  await server.register(Jwt);
+
+  // ✅ Baru definisikan strategi autentikasi
   server.auth.strategy('notesapp_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
@@ -45,6 +47,7 @@ const init = async () => {
       },
     }),
   });
+
 
   await server.register([
     {
@@ -65,8 +68,7 @@ const init = async () => {
       plugin: authentications,
       options: {
         authenticationsService,
-        // eslint-disable-next-line no-undef
-        usersService,
+        usersService: usersServices,
         tokenManager: TokenManager,
         validator: AuthValidator,
       },
@@ -74,7 +76,7 @@ const init = async () => {
   ]);
 
   await server.start();
-  console.log(`Server berjalan pada ${server.info.uri}`);
+  console.log(`✅ Server berjalan pada ${server.info.uri}`);
 };
 
 init();

@@ -1,18 +1,19 @@
+/* eslint-disable linebreak-style */
 const routes = (handler) => [
   {
     method: 'POST',
     path: '/authentications',
-    handler: handler.,
+    handler: handler.postAuthHandler,
   },
   {
     method: 'PUT',
     path: '/authentications',
-    handler: handler.,
+    handler: handler.puthAuthHandler,
   },
   {
     method: 'DELETE',
     path: '/authentications',
-    handler: handler.,
+    handler: handler.deleteAuthHandler,
   },
 ];
 
