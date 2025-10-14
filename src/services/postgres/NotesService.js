@@ -4,6 +4,8 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const { mapToDBModel } = require('../../utils');
+const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class NotesService {
   constructor() {
@@ -11,7 +13,9 @@ class NotesService {
     this._pool = new Pool();
   }
 
-  async addNote({ title, tags, body }) {
+  async addNote({
+    title, tags, body, owner,
+  }) {
     const id = nanoid(16);
     // eslint-disable-next-line camelcase
     const createdAt = new Date().toISOString();
@@ -19,9 +23,9 @@ class NotesService {
     const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO notes (id, title, tags, body, created_At, updated_At) VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
+      text: 'INSERT INTO notes (id, title, tags, body, created_At, updated_At, owner) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       // eslint-disable-next-line camelcase
-      values: [id, title, tags, body, createdAt, updatedAt],
+      values: [id, title, tags, body, createdAt, updatedAt, owner],
     };
 
     // eslint-disable-next-line no-underscore-dangle
@@ -34,9 +38,13 @@ class NotesService {
     return result.rows[0].id;
   }
 
-  async getNote() {
+  async getNote(owner) {
     // eslint-disable-next-line no-underscore-dangle
-    const result = await this._pool.query('SELECT * FROM notes');
+    const query = {
+      text: 'SELECT * FROM notes WHERE owner = $1',
+      values: [owner],
+    };
+    const result = await this._pool.query(query);
 
     return result.rows.map(mapToDBModel);
   }
@@ -82,6 +90,26 @@ class NotesService {
 
     if (!result.rows.length) {
       throw new Error('Gagal menghapus catatan, ID tidak ditemukan');
+    }
+  }
+
+  async verifyNotOwner(id, owner) {
+    const query = {
+      text: 'SELECT * FROM notes  WHERE id = $1',
+      values: [id],
+    };
+
+    // eslint-disable-next-line no-underscore-dangle
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Catatan tidak ditemukan');
+    }
+
+    const note = result.rows[0];
+
+    if (note.owner !== owner) {
+      throw new AuthorizationError('Anda tidak memiliki akses');
     }
   }
 }

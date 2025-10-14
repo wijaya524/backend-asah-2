@@ -1,5 +1,6 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 
 const notes = require('./api/notes');
 const { NotesService } = require('./services/postgres/NotesService');
@@ -9,9 +10,15 @@ const users = require('./api/users');
 const { UserService } = require('./services/postgres/UserService');
 const { UserValidator } = require('./validator/users');
 
+const authentications = require('./api/authentications');
+const { AuthService } = require('./services/postgres/AuthenticationService');
+const { AuthValidator } = require('./validator/auths');
+const TokenManager = require('./tokenizer/TokenManager');
+
 const init = async () => {
   const notesServices = new NotesService();
   const usersServices = new UserService();
+  const authenticationsService = new AuthService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -21,6 +28,22 @@ const init = async () => {
         origin: ['*'],
       },
     },
+  });
+
+  server.auth.strategy('notesapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
   });
 
   await server.register([
@@ -36,6 +59,16 @@ const init = async () => {
       options: {
         services: usersServices,
         validator: UserValidator,
+      },
+    },
+    {
+      plugin: authentications,
+      options: {
+        authenticationsService,
+        // eslint-disable-next-line no-undef
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthValidator,
       },
     },
   ]);
