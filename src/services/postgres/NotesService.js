@@ -8,9 +8,10 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class NotesService {
-  constructor() {
+  constructor(collaborationService) {
     // eslint-disable-next-line no-underscore-dangle
     this._pool = new Pool();
+    this._collaborationService = collaborationService;
   }
 
   async addNote({
@@ -110,6 +111,21 @@ class NotesService {
 
     if (note.owner !== owner) {
       throw new AuthorizationError('Anda tidak memiliki akses');
+    }
+  }
+
+  async verifyNoteAccess(noteId, userId) {
+    try {
+      await this.verifyNoteOwner(noteId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationService.verifyCollaborator(noteId, userId);
+      } catch {
+        throw error;
+      }
     }
   }
 }
