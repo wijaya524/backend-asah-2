@@ -1,19 +1,24 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-underscore-dangle */
+
 class AuthenticationsHandler {
   constructor(authenticationsService, usersService, tokenManager, validator) {
     this._authenticationsService = authenticationsService;
     this._usersService = usersService;
     this._tokenManager = tokenManager;
     this._validator = validator;
+
+    this.postAuthHandler = this.postAuthHandler.bind(this);
+    this.puthAuthHandler = this.puthAuthHandler.bind(this);
+    this.deleteAuthHandler = this.deleteAuthHandler.bind(this);
   }
 
   async postAuthHandler(request, h) {
-    this._validator.ValidatePostAuthPayload(request.payload);
+    this._validator.validatePostAuthPayload(request.payload);
 
     const { username, password } = request.payload;
 
-    const id = this._usersService.verifyUserCredentials(username, password);
+    const id = await this._usersService.verifyUserCredentials(username, password);
 
     const accessToken = this._tokenManager.generateAccessToken({ id });
     const refreshToken = this._tokenManager.generateRefreshToken({ id });
@@ -33,8 +38,8 @@ class AuthenticationsHandler {
     return response;
   }
 
-  async puthAuthHandler(request, h) {
-    this._validator.ValidatePutAuthPayload(request.payload);
+  async puthAuthHandler(request) {
+    this._validator.validatePutAuthPayload(request.payload);
 
     const { refreshToken } = request.payload;
 
@@ -51,8 +56,8 @@ class AuthenticationsHandler {
     };
   }
 
-  async deleteAuthHandler(request, h) {
-    this._validator.ValidateDeleteAuthPayload(request.payload);
+  async deleteAuthHandler(request) {
+    this._validator.validateDeleteAuthPayload(request.payload);
 
     const { refreshToken } = request.payload;
 

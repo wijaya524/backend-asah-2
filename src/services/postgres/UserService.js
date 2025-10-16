@@ -89,7 +89,16 @@ class UserService {
     return id;
   }
 
-
+  // eslint-disable-next-line class-methods-use-this
+  async getUsersByUsername(username) {
+    const query = {
+      text: 'SELECT id, username, fullname FROM users WHERE username LIKE $1',
+      values: [`%${username}%`],
+    };
+    // eslint-disable-next-line no-underscore-dangle
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
 }
 
 module.exports = { UserService };

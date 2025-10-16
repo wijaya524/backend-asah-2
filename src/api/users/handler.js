@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable linebreak-style */
 /* eslint-disable consistent-return */
 const NotFound = require('../../exceptions/NotFoundError');
@@ -12,6 +13,7 @@ class UsersHandler {
 
     this.postUsersHandler = this.postUsersHandler.bind(this);
     this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
+    this.getUsersByUsernameHandler = this.getUsersByUsernameHandler.bind(this);
   }
 
   async postUsersHandler(request, h) {
@@ -89,6 +91,18 @@ class UsersHandler {
       return response;
     }
   }
+
+  async getUsersByUsernameHandler(request, h) {
+    const { username = '' } = request.query;
+    const users = await this._service.getUsersByUsername(username);
+    return {
+      status: 'success',
+      data: {
+        users,
+      },
+    };
+  }
 }
+
 
 module.exports = UsersHandler;
