@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const UsersHandler = require('./handler');
 const routes = require('./route');
 
@@ -9,5 +10,5 @@ module.exports = {
 
     server.route(routes(userHandler));
   },
-// eslint-disable-next-line linebreak-style
+
 };

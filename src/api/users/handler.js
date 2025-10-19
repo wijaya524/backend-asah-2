@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable linebreak-style */
 /* eslint-disable consistent-return */
@@ -92,7 +93,7 @@ class UsersHandler {
     }
   }
 
-  async getUsersByUsernameHandler(request, h) {
+  async getUsersByUsernameHandler(request) {
     const { username = '' } = request.query;
     const users = await this._service.getUsersByUsername(username);
     return {
@@ -103,6 +104,5 @@ class UsersHandler {
     };
   }
 }
-
 
 module.exports = UsersHandler;
